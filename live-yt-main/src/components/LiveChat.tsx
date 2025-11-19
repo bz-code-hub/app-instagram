@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { chatConfig, comments } from "@/config/livestream-config";
-import { Smile, Users, Heart, Gift, Send, Flower2, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -51,7 +51,6 @@ export const LiveChat = () => {
   });
   const [inputValue, setInputValue] = useState("");
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const emojiIdCounter = useRef(0);
 
@@ -127,12 +126,6 @@ export const LiveChat = () => {
       timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
     };
   }, []);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
 
   return (
     <>

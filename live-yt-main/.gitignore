@@ -36,3 +36,6 @@ public/images/*.jpeg
 public/images/*.gif
 public/images/*.webp
 !public/images/.gitkeep
+
+# Claude Code
+.claude

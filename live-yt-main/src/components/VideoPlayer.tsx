@@ -1,13 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, Eye, X, MousePointerClick, Gift, Tag, TrendingUp, Sparkles, MessageCircle, Share2, User, Users, MoreVertical, Flame, Star } from "lucide-react";
-import { videoConfig, channelConfig, ctaButtonConfig, liveBannersConfig } from "@/config/livestream-config";
-
-interface VideoPlayerProps {
-  videoId?: string;
-  viewerCount?: number;
-}
-
+import { Eye, X, MousePointerClick, Gift, TrendingUp, Sparkles } from "lucide-react";
+import { videoConfig, channelConfig, ctaButtonConfig } from "@/config/livestream-config";
 
 // Helper function to extract YouTube video ID from URL or return ID directly
 const extractYouTubeId = (input: string): string => {
@@ -117,7 +111,6 @@ const getCtaButtonIcon = () => {
   const config = ctaButtonConfig;
 
   if (config.icon.gift) return Gift;
-  if (config.icon.tag) return Tag;
   if (config.icon.trending) return TrendingUp;
   if (config.icon.sparkles) return Sparkles;
 
@@ -125,31 +118,12 @@ const getCtaButtonIcon = () => {
   return MousePointerClick;
 };
 
-// Helper function to get banner icon
-const getBannerIcon = (iconType: string) => {
-  switch (iconType) {
-    case "heart":
-      return Heart;
-    case "flame":
-      return Flame;
-    case "star":
-      return Star;
-    case "trending":
-      return TrendingUp;
-    case "sparkles":
-      return Sparkles;
-    default:
-      return Flame;
-  }
-};
-
-export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps) => {
-  const extractedVideoId = extractYouTubeId(videoId);
+export const VideoPlayer = () => {
+  const extractedVideoId = extractYouTubeId(videoConfig.videoId);
   const [currentViewers, setCurrentViewers] = useState(videoConfig.viewers.initialCount);
   const [hasDropped, setHasDropped] = useState(false);
   const [showCtaButton, setShowCtaButton] = useState(false);
   const [profileImagePath, setProfileImagePath] = useState("");
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const isInitializing = useRef(false);
 
@@ -196,26 +170,33 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentViewers(prev => {
-        // If already dropped, keep in configured range
+        // If drop is disabled, keep viewers constant with small random fluctuations
+        if (!videoConfig.viewers.enableViewerDrop) {
+          const change = Math.random() > 0.5 ? 1 : -1;
+          const newValue = prev + change;
+          return Math.max(1, newValue);
+        }
+
+        // If already dropped, keep in configured afterDrop range
         if (hasDropped) {
-          const change = Math.random() > 0.5 ? 
-            Math.floor(Math.random() * 5) + 1 : 
+          const change = Math.random() > 0.5 ?
+            Math.floor(Math.random() * 5) + 1 :
             -(Math.floor(Math.random() * 5) + 1);
           const newValue = prev + change;
           return Math.max(
-            videoConfig.viewers.afterDrop.min, 
+            videoConfig.viewers.afterDrop.min,
             Math.min(videoConfig.viewers.afterDrop.max, newValue)
           );
         }
 
-        // Before the drop, keep in configured range
-        const change = Math.random() > 0.5 ? 
-          Math.floor(Math.random() * 15) + 1 : 
+        // Before the drop, keep in configured beforeDrop range
+        const change = Math.random() > 0.5 ?
+          Math.floor(Math.random() * 15) + 1 :
           -(Math.floor(Math.random() * 12) + 1);
-        
+
         const newValue = prev + change;
         return Math.max(
-          videoConfig.viewers.beforeDrop.min, 
+          videoConfig.viewers.beforeDrop.min,
           Math.min(videoConfig.viewers.beforeDrop.max, newValue)
         );
       });
@@ -235,21 +216,6 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
     }
   }, []);
 
-  // Banner rotation
-  useEffect(() => {
-    if (!liveBannersConfig.enabled || liveBannersConfig.banners.length <= 1) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setCurrentBannerIndex((prevIndex) =>
-        (prevIndex + 1) % liveBannersConfig.banners.length
-      );
-    }, liveBannersConfig.rotationInterval * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
 
   useEffect(() => {
     const container = playerContainerRef.current;
@@ -264,9 +230,12 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
 
     const w = window as any;
     let checkInterval: any = null;
-    let dropTimeout: any = null;
+    let dropFallbackTimeout: any = null;
 
     const triggerDrop = () => {
+      // Check if viewer drop is enabled
+      if (!videoConfig.viewers.enableViewerDrop) return;
+
       if (w.__VIEWER_DROP_DONE) return;
       w.__VIEWER_DROP_DONE = true;
       setHasDropped(true);
@@ -333,16 +302,15 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
         };
       }
 
-      dropTimeout = setTimeout(() => {
-        if (!w.__VIEWER_DROP_DONE) {
-          triggerDrop();
-        }
+      // Fallback timeout if video player doesn't provide getCurrentTime
+      dropFallbackTimeout = setTimeout(() => {
+        triggerDrop();
       }, videoConfig.viewers.dropTimeInSeconds * 1000);
 
       return () => {
         isInitializing.current = false;
         if (checkInterval) clearInterval(checkInterval);
-        if (dropTimeout) clearTimeout(dropTimeout);
+        if (dropFallbackTimeout) clearTimeout(dropFallbackTimeout);
         if (player && player.destroy) {
           player.destroy();
         }
@@ -380,15 +348,14 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
         container.appendChild(newScript);
       });
 
-      dropTimeout = setTimeout(() => {
-        if (!w.__VIEWER_DROP_DONE) {
-          triggerDrop();
-        }
+      // Fallback timeout for Panda Video
+      dropFallbackTimeout = setTimeout(() => {
+        triggerDrop();
       }, videoConfig.viewers.dropTimeInSeconds * 1000);
 
       return () => {
         isInitializing.current = false;
-        if (dropTimeout) clearTimeout(dropTimeout);
+        if (dropFallbackTimeout) clearTimeout(dropFallbackTimeout);
 
         // Clean up container completely
         container.innerHTML = '';
@@ -416,16 +383,15 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
         }
       }, 1000);
 
-      dropTimeout = setTimeout(() => {
-        if (!w.__VIEWER_DROP_DONE) {
-          triggerDrop();
-        }
+      // Fallback timeout for Direct Video
+      dropFallbackTimeout = setTimeout(() => {
+        triggerDrop();
       }, videoConfig.viewers.dropTimeInSeconds * 1000);
 
       return () => {
         isInitializing.current = false;
         if (checkInterval) clearInterval(checkInterval);
-        if (dropTimeout) clearTimeout(dropTimeout);
+        if (dropFallbackTimeout) clearTimeout(dropFallbackTimeout);
       };
     }
 
@@ -486,15 +452,14 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
         document.head.appendChild(newScript);
       });
 
-      dropTimeout = setTimeout(() => {
-        if (!w.__VIEWER_DROP_DONE) {
-          triggerDrop();
-        }
+      // Fallback timeout for Vimeo
+      dropFallbackTimeout = setTimeout(() => {
+        triggerDrop();
       }, videoConfig.viewers.dropTimeInSeconds * 1000);
 
       return () => {
         isInitializing.current = false;
-        if (dropTimeout) clearTimeout(dropTimeout);
+        if (dropFallbackTimeout) clearTimeout(dropFallbackTimeout);
 
         // Clean up container completely
         container.innerHTML = '';
@@ -515,18 +480,17 @@ export const VideoPlayer = ({ videoId = videoConfig.videoId }: VideoPlayerProps)
         oldScript.parentNode?.replaceChild(newScript, oldScript);
       });
 
-      dropTimeout = setTimeout(() => {
-        if (!w.__VIEWER_DROP_DONE) {
-          triggerDrop();
-        }
+      // Fallback timeout for Vturb
+      dropFallbackTimeout = setTimeout(() => {
+        triggerDrop();
       }, videoConfig.viewers.dropTimeInSeconds * 1000);
 
       return () => {
         isInitializing.current = false;
-        if (dropTimeout) clearTimeout(dropTimeout);
+        if (dropFallbackTimeout) clearTimeout(dropFallbackTimeout);
       };
     }
-  }, [videoId]);
+  }, []);
 
   return (
     <div className="absolute inset-0 w-full h-full">

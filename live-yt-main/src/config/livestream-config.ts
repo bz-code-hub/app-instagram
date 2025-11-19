@@ -45,28 +45,29 @@ export const videoConfig = {
   // Supports: MP4, WebM, OGG
   directVideoUrl: "",
 
-  // 📝 Title displayed on the broadcast
-  title: "Live Stream Broadcast",
-
   // 📊 Live viewer configuration
   viewers: {
     // Initial viewer count
-    initialCount: 280,
+    initialCount: 2402,
 
-    // Viewers BEFORE the drop (range)
+    // 📉 VIEWER DROP CONFIGURATION
+    // Set to true to enable viewer drop effect, false to keep constant viewers
+    enableViewerDrop: true,
+
+    // Viewers BEFORE the drop (range) - only used if enableViewerDrop is true
     beforeDrop: {
-      min: 250,
-      max: 400,
+      min: 2500,
+      max: 3000,
     },
 
-    // Viewers AFTER the drop (range)
+    // Viewers AFTER the drop (range) - only used if enableViewerDrop is true
     afterDrop: {
       min: 100,
       max: 120,
     },
 
     // ⏱️ Time in SECONDS when viewer drop occurs
-    // (198 seconds = 3 minutes and 18 seconds)
+    // (198 seconds = 3 minutes and 18 seconds) - only used if enableViewerDrop is true
     dropTimeInSeconds: 10,
 
     // Update interval (in milliseconds)
@@ -93,67 +94,6 @@ export const channelConfig = {
   // Leave empty "" to use initials
   profileImageUrl: "profile",
 
-  // ❤️ Hearts/Likes count displayed in header
-  // Examples: "4.8K", "12K", "1.2M", "500"
-  heartsCount: "2.1K",
-
-  // Welcome message
-  welcomeMessage: "Welcome to the live stream! 🎥",
-};
-
-// ═══════════════════════════════════════════════════════════════
-// 🏷️ LIVE BANNERS CONFIGURATION (rotating banners for Instagram Live)
-// ═══════════════════════════════════════════════════════════════
-
-export const liveBannersConfig = {
-  // Enable banner rotation
-  enabled: true,
-
-  // Rotation interval in seconds (how often banners change)
-  rotationInterval: 5,
-
-  // List of banners that will rotate
-  // You can add as many as you want!
-  banners: [
-    {
-      text: "Popular LIVE",
-      icon: "heart", // Options: "heart", "flame", "star", "trending", "sparkles"
-      iconColor: "text-orange-400",
-    },
-    {
-      text: "Daily rankings",
-      icon: "flame",
-      iconColor: "text-yellow-400",
-    },
-    {
-      text: "Top LIVE",
-      icon: "star",
-      iconColor: "text-yellow-300",
-    },
-    {
-      text: "Trending now",
-      icon: "trending",
-      iconColor: "text-cyan-400",
-    },
-    {
-      text: "Rising star",
-      icon: "sparkles",
-      iconColor: "text-pink-400",
-    },
-    {
-      text: "Weekly rankings",
-      icon: "flame",
-      iconColor: "text-orange-500",
-    },
-  ],
-
-  // Right side banner (static - appears on the opposite side)
-  // This banner does NOT rotate, it stays fixed
-  rightBanner: {
-    enabled: true, // Set to false to hide this banner
-    text: "LIVE FEST", // Change to any text you want
-    // Common examples: "LIVE FEST", "TOP LIVE", "SPECIAL EVENT", "HOT", "NEW"
-  },
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -208,9 +148,6 @@ export const ctaButtonConfig = {
 export const chatConfig = {
   // 📱 How many comments to show on screen at once
   visibleComments: 5,
-
-  // 🎨 Message input placeholder
-  inputPlaceholder: "Send a message...",
 
   // ⏱️ Interval between comments (in seconds)
   // Set to 1 for comments to appear every 1 second
