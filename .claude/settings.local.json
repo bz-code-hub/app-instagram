@@ -12,7 +12,8 @@
       "Bash(powershell -Command \"Get-ChildItem -Force | Where-Object {$_SIsContainer} | ForEach-Object {$size = (Get-ChildItem -Recurse -Force $_ullName | Measure-Object -Property Length -Sum).Sum; ''''{0:N0} bytes - {1}'''' -f $size, $_ame}\")",
       "Bash(sort:*)",
       "Bash(powershell -Command:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
