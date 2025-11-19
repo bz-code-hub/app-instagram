@@ -87,10 +87,10 @@ export const channelConfig = {
   initials: "MC",
 
   // 🖼️ Profile image URL (optional)
-  // Specify the full path with extension: "/images/profile.jpg"
+  // Specify the full path with extension: "/images/profile.png"
   // Place images in /public/images/ folder
   // Leave empty "" to use initials
-  profileImageUrl: "/images/profile.jpg",
+  profileImageUrl: "/images/profile.png",
 
 };
 
