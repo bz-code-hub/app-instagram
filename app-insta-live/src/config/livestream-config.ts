@@ -52,7 +52,7 @@ export const videoConfig = {
 
     // 📉 VIEWER DROP CONFIGURATION
     // Set to true to enable viewer drop effect, false to keep constant viewers
-    enableViewerDrop: true,
+    enableViewerDrop: false,
 
     // Viewers BEFORE the drop (range) - only used if enableViewerDrop is true
     beforeDrop: {
@@ -111,7 +111,7 @@ export const ctaButtonConfig = {
   delayInSeconds: 20,
 
   // Button link/URL
-  link: "https://example.com",
+  link: "https://google.com",
 
   // 🎨 BUTTON COLOR (choose ONE - set to true)
   color: {
