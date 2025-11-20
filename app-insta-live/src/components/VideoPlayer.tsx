@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, X, MousePointerClick, Gift, TrendingUp, Sparkles } from "lucide-react";
-import { videoConfig, channelConfig, ctaButtonConfig } from "@/config/livestream-config";
+import { videoConfig, channelConfig, ctaButtonConfig, heartsConfig } from "@/config/livestream-config";
+import { HeartAnimation } from "./HeartAnimation";
 
 // Helper function to extract YouTube video ID from URL or return ID directly
 const extractYouTubeId = (input: string): string => {
@@ -508,6 +509,9 @@ export const VideoPlayer = () => {
           </a>
         </div>
       )}
+
+      {/* Heart Animation */}
+      {heartsConfig.enabled && <HeartAnimation />}
 
     </div>
   );
